@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Ellit Home · Rhuan</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0F1333;min-height:100vh;color:#fff;}
+.app{max-width:480px;margin:0 auto;padding-bottom:2rem;}
+.topbar{background:#1A1F5E;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.tlogo{font-size:11px;font-weight:700;color:#F5B800;letter-spacing:.1em;}
+.tvend{font-size:12px;font-weight:700;color:#F5B800;}
+.tdata{font-size:11px;color:rgba(255,255,255,.45);}
+.prog{height:4px;background:rgba(255,255,255,.1);}
+.progfill{height:4px;background:#F5B800;transition:width .4s;}
+.stats{display:flex;background:#1A1F5E;margin:14px 16px 0;border-radius:14px;overflow:hidden;border:1px solid #2D3575;}
+.stat{flex:1;padding:12px 4px;text-align:center;border-right:1px solid #2D3575;}
+.stat:last-child{border-right:none;}
+.snum{font-size:22px;font-weight:700;color:#F5B800;}
+.snum.r{color:#E24B4A;}
+.snum.g{color:#1D9E75;}
+.slbl{font-size:10px;color:rgba(255,255,255,.45);margin-top:2px;}
+.sync-status{margin:10px 16px 0;padding:8px 12px;border-radius:10px;font-size:12px;font-weight:500;text-align:center;}
+.sync-ok{background:#0F3024;color:#1D9E75;border:1px solid #1D9E75;}
+.sync-pend{background:#2A1E00;color:#F5B800;border:1px solid #F5B800;}
+.sync-err{background:#2A1010;color:#E24B4A;border:1px solid #E24B4A;}
+.body{padding:16px;}
+.stitle{font-size:11px;font-weight:700;color:#F5B800;text-transform:uppercase;letter-spacing:.08em;margin:20px 0 10px;}
+.stitle:first-child{margin-top:4px;}
+.field{margin-bottom:14px;}
+label{display:block;font-size:13px;font-weight:500;color:#F5B800;margin-bottom:6px;}
+label .req{color:#E24B4A;margin-left:2px;}
+input,select,textarea{width:100%;padding:14px;border:1.5px solid #2D3575;border-radius:12px;font-size:15px;color:#fff;background:#1E2760;outline:none;-webkit-appearance:none;font-family:inherit;transition:border-color .2s;}
+input:focus,select:focus,textarea:focus{border-color:#F5B800;}
+input.err,select.err,textarea.err{border-color:#E24B4A!important;background:#2A1520;}
+input::placeholder,textarea::placeholder{color:#4A5280;}
+textarea{resize:none;min-height:72px;}
+.tel-wrap{display:flex;gap:8px;}
+.tel-prefix{background:#252B7A;border:1.5px solid #2D3575;border-radius:12px;padding:14px 12px;font-size:14px;font-weight:700;color:#F5B800;white-space:nowrap;display:flex;align-items:center;}
+.tel-wrap input{flex:1;}
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{padding:10px 16px;border-radius:10px;border:1.5px solid #2D3575;font-size:13px;font-weight:500;color:rgba(255,255,255,.6);background:#1E2760;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;transition:all .15s;}
+.chip.active{background:#F5B800;color:#1A1F5E;border-color:#F5B800;font-weight:700;}
+.chip.errc{border-color:#E24B4A!important;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.btn-save{display:block;width:calc(100% - 32px);margin:8px 16px 0;background:#F5B800;color:#1A1F5E;font-size:15px;font-weight:700;letter-spacing:.05em;padding:18px;border:none;border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.btn-save:active{opacity:.9;transform:scale(.98);}
+.btn-sync{display:block;width:calc(100% - 32px);margin:10px 16px 0;background:transparent;color:#F5B800;font-size:13px;font-weight:600;padding:14px;border:1.5px solid #2D3575;border-radius:14px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:#F5B800;color:#1A1F5E;font-size:13px;font-weight:700;padding:12px 24px;border-radius:30px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;z-index:999;}
+.toast.show{opacity:1;}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#F5B800;border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;margin-right:6px;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="topbar">
+  <div class="tlogo">⚡ ELLIT HOME</div>
+  <div class="tvend">Rhuan</div>
+  <div class="tdata" id="tdata"></div>
+</div>
+<div class="prog"><div class="progfill" id="progfill" style="width:0%"></div></div>
+
+<div class="stats">
+  <div class="stat"><div class="snum" id="s-mes">0</div><div class="slbl">No mês</div></div>
+  <div class="stat"><div class="snum">56</div><div class="slbl">Meta</div></div>
+  <div class="stat"><div class="snum r" id="s-faltam">56</div><div class="slbl">Faltam</div></div>
+  <div class="stat"><div class="snum g" id="s-perc">0%</div><div class="slbl">Atingido</div></div>
+</div>
+
+<div class="sync-status sync-pend" id="sync-status">⏳ Pendente de sincronização com Google Sheets</div>
+
+<div class="body">
+  <div class="stitle">Identificação</div>
+  <div class="field">
+    <label>Nome do cliente <span class="req">*</span></label>
+    <input type="text" id="f-nome" placeholder="Nome completo" autocomplete="off" autocorrect="off"/>
+  </div>
+  <div class="field">
+    <label>Telefone / WhatsApp <span class="req">*</span></label>
+    <div class="tel-wrap">
+      <div class="tel-prefix">+55</div>
+      <input type="tel" id="f-tel" placeholder="(15) 9 9999-0000"/>
+    </div>
+  </div>
+  <div class="field">
+    <label>Cidade <span class="req">*</span></label>
+    <input type="text" id="f-cidade" placeholder="Ex: Sorocaba" autocomplete="off"/>
+  </div>
+  <div class="stitle">Qualificação</div>
+  <div class="field">
+    <label>Tipo de telhado <span class="req">*</span></label>
+    <div class="chips" id="cg-telhado">
+      <div class="chip" data-val="Cerâmica">Cerâmica</div>
+      <div class="chip" data-val="Fibrocimento">Fibrocimento</div>
+      <div class="chip" data-val="Metálico">Metálico</div>
+      <div class="chip" data-val="Laje">Laje</div>
+      <div class="chip" data-val="Outro">Outro</div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Fonte do lead <span class="req">*</span></label>
+    <div class="chips" id="cg-fonte">
+      <div class="chip" data-val="PaP">PaP</div>
+      <div class="chip" data-val="Evento">Evento</div>
+      <div class="chip" data-val="Networking">Networking</div>
+      <div class="chip" data-val="Indicação">Indicação</div>
+    </div>
+  </div>
+  <div class="row2">
+    <div class="field">
+      <label>Conta de luz (R$) <span class="req">*</span></label>
+      <input type="number" id="f-conta" placeholder="350" min="0" step="1" inputmode="numeric"/>
+    </div>
+    <div class="field">
+      <label>Previsão de aumento? <span class="req">*</span></label>
+      <div class="chips" id="cg-aumento">
+        <div class="chip" data-val="Sim">Sim</div>
+        <div class="chip" data-val="Não">Não</div>
+      </div>
+    </div>
+  </div>
+  <div class="field">
+    <label>Observações</label>
+    <textarea id="f-obs" placeholder="Informações extras sobre o lead..."></textarea>
+  </div>
+</div>
+
+<button class="btn-save" id="btn-save" onclick="salvar()">SALVAR CADASTRO</button>
+<button class="btn-sync" onclick="sincronizarPendentes()">🔄 Sincronizar com Google Sheets</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const VENDEDOR="Rhuan",META=56,KEY="ellit_rhuan",KEY_PEND="ellit_rhuan_pend";
+const SHEETS_URL="https://script.google.com/macros/s/AKfycbzVq2fTDzT0-McPcGAW97FAAdrWDbSs8c25G-LqgKGqInTwkniYFC9vMr_PUrhKsn4H_g/exec";
+let regs=JSON.parse(localStorage.getItem(KEY)||"[]");
+let pendentes=JSON.parse(localStorage.getItem(KEY_PEND)||"[]");
+
+function getMes(){const d=new Date();return(d.getMonth()+1)+"/"+d.getFullYear();}
+function getDH(){const d=new Date(),p=n=>String(n).padStart(2,"0");return p(d.getDate())+"/"+p(d.getMonth()+1)+"/"+d.getFullYear()+" "+p(d.getHours())+":"+p(d.getMinutes());}
+function updData(){const d=new Date(),ds=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];document.getElementById("tdata").textContent=ds[d.getDay()]+" "+String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0");}
+function updStats(){const n=regs.filter(r=>r._mes===getMes()).length,f=Math.max(0,META-n),p=Math.round(n/META*100);document.getElementById("s-mes").textContent=n;document.getElementById("s-faltam").textContent=f;document.getElementById("s-perc").textContent=p+"%";document.getElementById("progfill").style.width=Math.min(100,p)+"%";}
+function updSyncStatus(){const el=document.getElementById("sync-status");if(pendentes.length===0){el.className="sync-status sync-ok";el.textContent="✅ Tudo sincronizado com Google Sheets";}else{el.className="sync-status sync-pend";el.textContent="⏳ "+pendentes.length+" registro(s) aguardando sincronização";}}
+function initChips(g){document.querySelectorAll("#"+g+" .chip").forEach(c=>{c.addEventListener("click",()=>{document.querySelectorAll("#"+g+" .chip").forEach(x=>x.classList.remove("active","errc"));c.classList.add("active");});});}
+function getChip(g){const a=document.querySelector("#"+g+" .chip.active");return a?a.dataset.val:"";}
+function toast(m,d=2500){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),d);}
+function limpar(){["f-nome","f-tel","f-cidade","f-conta","f-obs"].forEach(id=>document.getElementById(id).value="");["cg-telhado","cg-fonte","cg-aumento"].forEach(g=>document.querySelectorAll("#"+g+" .chip").forEach(c=>c.classList.remove("active")));}
+
+async function enviarParaSheets(reg){
+  try{
+    const r=await fetch(SHEETS_URL,{method:"POST",body:JSON.stringify(reg),headers:{"Content-Type":"text/plain"}});
+    const txt=await r.text();
+    return txt.includes("ok");
+  }catch(e){return false;}
+}
+
+async function sincronizarPendentes(){
+  if(!pendentes.length){toast("Nada pendente para sincronizar ✓");return;}
+  const btn=document.getElementById("btn-save");
+  const syncBtn=document.querySelector(".btn-sync");
+  syncBtn.innerHTML='<span class="spinner"></span>Sincronizando...';
+  syncBtn.disabled=true;
+  let ok=0,fail=0;
+  const novaPendente=[];
+  for(const reg of pendentes){
+    const sucesso=await enviarParaSheets(reg);
+    if(sucesso)ok++;
+    else{fail++;novaPendente.push(reg);}
+  }
+  pendentes=novaPendente;
+  localStorage.setItem(KEY_PEND,JSON.stringify(pendentes));
+  updSyncStatus();
+  syncBtn.innerHTML="🔄 Sincronizar com Google Sheets";
+  syncBtn.disabled=false;
+  if(fail===0)toast("✅ "+ok+" registro(s) sincronizados!");
+  else toast("⚠️ "+ok+" ok · "+fail+" falharam. Tente novamente.");
+}
+
+async function salvar(){
+  let ok=true;
+  ["f-nome","f-tel","f-cidade","f-conta"].forEach(id=>{const el=document.getElementById(id);if(!el.value.trim()){el.classList.add("err");ok=false;}else el.classList.remove("err");});
+  const telhado=getChip("cg-telhado"),fonte=getChip("cg-fonte"),aumento=getChip("cg-aumento");
+  if(!telhado){document.querySelectorAll("#cg-telhado .chip").forEach(c=>c.classList.add("errc"));ok=false;}
+  if(!fonte){document.querySelectorAll("#cg-fonte .chip").forEach(c=>c.classList.add("errc"));ok=false;}
+  if(!aumento){document.querySelectorAll("#cg-aumento .chip").forEach(c=>c.classList.add("errc"));ok=false;}
+  if(!ok){toast("Preencha todos os campos obrigatórios ✕");return;}
+  const reg={_mes:getMes(),Data:getDH(),Vendedor:VENDEDOR,Nome:document.getElementById("f-nome").value.trim(),Telefone:"+55 "+document.getElementById("f-tel").value.trim(),Cidade:document.getElementById("f-cidade").value.trim(),Telhado:telhado,"Fonte do Lead":fonte,"Conta de Luz (R$)":Number(document.getElementById("f-conta").value),"Previsão de Aumento":aumento,"Observações":document.getElementById("f-obs").value.trim()};
+  regs.push(reg);
+  localStorage.setItem(KEY,JSON.stringify(regs));
+  pendentes.push(reg);
+  localStorage.setItem(KEY_PEND,JSON.stringify(pendentes));
+  updStats();updSyncStatus();limpar();
+  toast("Salvo! Enviando para Sheets...");
+  window.scrollTo({top:0,behavior:"smooth"});
+  const btn=document.getElementById("btn-save");
+  btn.disabled=true;btn.textContent="Enviando...";
+  const sucesso=await enviarParaSheets(reg);
+  btn.disabled=false;btn.textContent="SALVAR CADASTRO";
+  if(sucesso){
+    pendentes=pendentes.filter(p=>p.Data!==reg.Data||p.Nome!==reg.Nome);
+    localStorage.setItem(KEY_PEND,JSON.stringify(pendentes));
+    updSyncStatus();
+    toast("✅ Cadastro salvo e sincronizado!");
+  }else{
+    toast("⚠️ Salvo localmente — sem internet. Sincronize depois.");
+  }
+}
+
+initChips("cg-telhado");initChips("cg-fonte");initChips("cg-aumento");
+updData();updStats();updSyncStatus();setInterval(updData,60000);
+sincronizarPendentes();
+</script>
+</body>
+</html>
