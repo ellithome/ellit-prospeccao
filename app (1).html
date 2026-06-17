@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Ellit Home — Calculadora de Comissão</title>
+<style>
+  :root{
+    --navy:#1A1F5E;
+    --navy-2:#252B7A;
+    --gold:#F5B800;
+    --gold-deep:#D69900;
+    --bg:#F3F4F9;
+    --card:#FFFFFF;
+    --ink:#1A1F2B;
+    --muted:#6B7280;
+    --line:#E7E8F0;
+    --floor:#9CA3AF;
+    --warn:#E8833A;
+    --ok:#2F9E5B;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:48px;
+  }
+  .topbar{
+    background:linear-gradient(135deg,var(--navy) 0%, var(--navy-2) 100%);
+    color:#fff;
+    padding:12px 18px 13px;
+    border-bottom:3px solid var(--gold);
+  }
+  .topbar .brand{
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--gold);
+    font-weight:700;
+    margin-bottom:2px;
+  }
+  .topbar h1{
+    margin:0;
+    font-size:18px;
+    font-weight:700;
+    letter-spacing:-.01em;
+  }
+  .topbar p{display:none;}
+
+  .wrap{max-width:480px;margin:0 auto;padding:0 14px;}
+
+  .card{
+    background:var(--card);
+    border-radius:14px;
+    padding:10px 13px;
+    margin-top:7px;
+    box-shadow:0 1px 2px rgba(26,31,94,.04), 0 8px 24px rgba(26,31,94,.05);
+    border:1px solid var(--line);
+  }
+  .card h2{
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.07em;
+    color:var(--muted);
+    margin:0 0 9px;
+    font-weight:700;
+  }
+  .divider{height:1px;background:var(--line);margin:8px 0;}
+  .subhead{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;margin:0 0 8px;}
+
+  label{
+    display:block;
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:4px;
+  }
+  .field{margin-bottom:6px;}
+  .field:last-child{margin-bottom:0;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+
+  input[type=text], input[type=number], select{
+    width:100%;
+    padding:9px 11px;
+    border-radius:10px;
+    border:1.5px solid var(--line);
+    background:#FBFBFE;
+    font-size:15px;
+    color:var(--ink);
+    font-family:inherit;
+    appearance:none;
+    -webkit-appearance:none;
+    text-overflow:ellipsis;
+  }
+  input:focus, select:focus{
+    outline:none;
+    border-color:var(--gold);
+    background:#fff;
+  }
+  select{
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%231A1F5E'><path d='M5.5 7.5L10 12l4.5-4.5'/></svg>");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    padding-right:28px;
+  }
+  .hint{font-size:10.5px;color:var(--muted);margin-top:4px;line-height:1.35;}
+
+  .faturamento-input{
+    font-size:21px;
+    font-weight:700;
+    padding:10px 11px;
+    text-align:left;
+  }
+
+  .hero{
+    background:linear-gradient(135deg,var(--navy) 0%, var(--navy-2) 100%);
+    border-radius:14px;
+    padding:11px 14px;
+    margin-top:7px;
+    color:#fff;
+    position:relative;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; right:-40px; top:-40px;
+    width:120px;height:120px;border-radius:50%;
+    background:rgba(245,184,0,.12);
+  }
+  .hero .label{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;
+    color:#C7CAEF; font-weight:700;
+  }
+  .hero .value{
+    font-size:25px;font-weight:800;letter-spacing:-.02em;
+    margin:0 0 4px;
+    font-variant-numeric:tabular-nums;
+    position:relative;
+  }
+  .breakdown{
+    display:flex; gap:16px; font-size:12px; color:#D8DAF4; position:relative;
+  }
+  .breakdown b{color:#fff;font-variant-numeric:tabular-nums;}
+
+  .track-wrap{margin-top:8px;}
+  .track{
+    position:relative;
+    height:11px;
+    border-radius:6px;
+    overflow:hidden;
+    display:flex;
+    margin-top:8px;
+  }
+  .seg{height:100%;}
+  .seg-floor{background:#3a3f86;}
+  .seg-mid{background:#5b62b8;}
+  .seg-ideal{background:var(--gold-deep);}
+  .seg-120{background:var(--gold);}
+  .seg-150{background:#FFD466;}
+  .marker{
+    position:absolute;
+    top:-6px;
+    width:0;height:0;
+    border-left:7px solid transparent;
+    border-right:7px solid transparent;
+    border-top:8px solid #fff;
+    transform:translateX(-7px);
+    filter:drop-shadow(0 1px 2px rgba(0,0,0,.4));
+  }
+  .scale-labels{
+    display:flex;justify-content:space-between;
+    font-size:9.5px;color:#AEB2E6;margin-top:5px;
+  }
+  .atingimento-tag{
+    display:inline-block;
+    margin-top:6px;
+    padding:3px 9px;
+    border-radius:20px;
+    background:rgba(245,184,0,.18);
+    color:var(--gold);
+    font-weight:700;
+    font-size:11.5px;
+  }
+
+  .next-banner{
+    margin-top:8px;
+    border-radius:11px;
+    padding:8px 11px;
+    background:rgba(255,255,255,.07);
+    border:1px solid rgba(255,255,255,.12);
+    position:relative;
+  }
+  .next-banner .tag{
+    font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;
+    margin-bottom:4px;color:var(--gold);
+  }
+  .next-banner .msg{font-size:13px;line-height:1.4;font-weight:600;color:#fff;}
+  .next-banner .msg b{font-variant-numeric:tabular-nums;color:var(--gold);}
+  .next-banner .sub{font-size:10.5px;color:#C7CAEF;margin-top:3px;}
+
+  .save-toast{
+    position:fixed; bottom:18px; left:50%; transform:translateX(-50%) translateY(10px);
+    background:var(--navy); color:#fff; padding:9px 16px; border-radius:30px;
+    font-size:12.5px; font-weight:600; opacity:0; transition:opacity .25s, transform .25s;
+    pointer-events:none; box-shadow:0 6px 18px rgba(26,31,94,.3);
+  }
+  .save-toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  .info-toggle{
+    display:block;width:100%;text-align:center;margin-top:6px;
+    background:none;border:none;color:var(--muted);font-size:11px;
+    font-family:inherit;padding:2px;text-decoration:underline;
+  }
+  .footnote{
+    font-size:10.5px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.5;
+    padding:0 8px;display:none;
+  }
+  .footnote.show{display:block;}
+  body{padding-bottom:20px;}
+
+  .chart-btn{
+    display:block;width:100%;margin-top:7px;padding:8px;border:none;border-radius:12px;
+    background:var(--gold);color:var(--navy);font-weight:700;font-size:13.5px;
+    font-family:inherit;
+  }
+  .chart-btn:active{opacity:.85;}
+  .back-btn{
+    background:none;border:none;color:var(--navy);font-weight:700;font-size:13.5px;
+    font-family:inherit;padding:6px 0;margin-bottom:2px;
+  }
+  .legend{display:flex;gap:14px;font-size:10.5px;color:var(--muted);margin-top:8px;}
+  .legend span{display:inline-flex;align-items:center;gap:4px;}
+  .dot-actual{width:8px;height:8px;border-radius:50%;background:var(--navy);display:inline-block;}
+  .dot-ref{width:12px;height:0;border-top:2px dashed #9CA3AF;display:inline-block;}
+  .name-locked{
+    width:100%;padding:9px 11px;border-radius:10px;background:#F0F1F7;color:var(--muted);
+    font-size:14px;font-weight:600;border:1.5px solid var(--line);
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap" style="padding:0;">
+    <div class="brand">Ellit Home Energia Solar</div>
+    <h1>Calculadora de Comissão</h1>
+    <p>Acompanhe seu salário e sua aceleração em tempo real</p>
+  </div>
+</div>
+
+<div class="wrap">
+<div id="mainScreen">
+
+  <div class="card">
+    <h2>Seus dados</h2>
+    <div class="field" id="nomeFieldWrap">
+      <input type="text" id="nome" placeholder="Seu nome (ex: Juan)" autocomplete="off">
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label for="nivel">Nível</label>
+        <select id="nivel"></select>
+      </div>
+      <div class="field">
+        <label for="rampagem">Rampagem (%)</label>
+        <input type="number" id="rampagem" min="0" max="100" step="1" value="100">
+      </div>
+    </div>
+    <div class="hint" id="oteHint"></div>
+
+    <div class="divider"></div>
+
+    <div class="subhead">Faturamento do mês</div>
+    <div class="field" style="margin-bottom:0;">
+      <input type="number" id="faturamento" class="faturamento-input" min="0" step="100" value="0" inputmode="decimal" placeholder="Quanto você já vendeu (R$)">
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="label">Salário previsto este mês</div>
+    <div class="value" id="salarioTotal">R$ 0</div>
+    <div class="breakdown">
+      <div>Fixo: <b id="fixoVal">R$ 0</b></div>
+      <div>Comissão: <b id="comissaoVal">R$ 0</b></div>
+    </div>
+
+    <div class="track-wrap">
+      <div class="track">
+        <div class="seg seg-floor" style="width:43.75%"></div>
+        <div class="seg seg-mid" style="width:18.75%"></div>
+        <div class="seg seg-ideal" style="width:12.5%"></div>
+        <div class="seg seg-120" style="width:18.75%"></div>
+        <div class="seg seg-150" style="width:6.25%"></div>
+        <div class="marker" id="marker" style="left:0%"></div>
+      </div>
+      <div class="scale-labels">
+        <span>0%</span><span>70%</span><span>100%</span><span>120%</span><span>150%+</span>
+      </div>
+    </div>
+    <div class="atingimento-tag" id="atingimentoTag">0% da meta</div>
+
+    <div class="next-banner" id="nextCard">
+      <div class="tag" id="nextTag">PRÓXIMO PASSO</div>
+      <div class="msg" id="nextMsg">Preencha seus dados acima.</div>
+      <div class="sub" id="nextSub"></div>
+    </div>
+  </div>
+
+  <button class="chart-btn" id="chartBtn" type="button">📈 Ver ritmo do mês</button>
+  <button class="info-toggle" id="infoToggle" type="button">Como funciona a curva de comissão ⌄</button>
+  <div class="footnote" id="footnote">
+    Meta mínima = 70% da meta do nível (abaixo disso a comissão não é liberada). Meta ideal = 100% da meta. Os multiplicadores de 120% e 150% seguem exatamente a curva de aceleração da planilha de comissionamento.
+  </div>
+
+</div>
+
+<div id="chartScreen" style="display:none;">
+  <button class="back-btn" id="backBtn" type="button">← Voltar</button>
+  <div class="card" style="margin-top:0;">
+    <h2 id="chartTitle">Ritmo do mês</h2>
+    <div id="chartContainer"></div>
+    <div class="legend">
+      <span><i class="dot-actual"></i> Seu faturamento real</span>
+      <span><i class="dot-ref"></i> Ritmo ideal pra bater a meta</span>
+    </div>
+    <div class="hint" id="chartEmptyMsg" style="margin-top:8px;display:none;">
+      Ainda só tem um dia registrado este mês. Volte aqui depois de atualizar seu faturamento em mais dias pra ver sua linha de ritmo.
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="save-toast" id="toast">Progresso salvo</div>
+
+<script>
+const LEVELS = [{"nivel": 1, "ote": 4000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 2400, "variavel": 1600, "meta": 120000, "accel120": 1.3, "accel150": 1.7}, {"nivel": 2, "ote": 5000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 3000, "variavel": 2000, "meta": 150000, "accel120": 1.4, "accel150": 1.8}, {"nivel": 3, "ote": 6000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 3600, "variavel": 2400, "meta": 180000, "accel120": 1.6, "accel150": 2.2}, {"nivel": 4, "ote": 7000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 4200, "variavel": 2800, "meta": 210000, "accel120": 1.7, "accel150": 2.3}, {"nivel": 5, "ote": 8000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 4800, "variavel": 3200, "meta": 240000, "accel120": 2, "accel150": 2.7}, {"nivel": 6, "ote": 9000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 5400, "variavel": 3600, "meta": 270000, "accel120": 2.1, "accel150": 2.8}, {"nivel": 7, "ote": 10000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 6000, "variavel": 4000, "meta": 300000, "accel120": 2.5, "accel150": 3.3}, {"nivel": 8, "ote": 11000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 6600, "variavel": 4400, "meta": 330000, "accel120": 2.6, "accel150": 3.4}, {"nivel": 9, "ote": 12000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 7200, "variavel": 4800, "meta": 360000, "accel120": 3, "accel150": 3.9}, {"nivel": 10, "ote": 13000, "pFixo": 0.6, "pVariavel": 0.4, "fixo": 7800, "variavel": 5200, "meta": 390000, "accel120": 3.1, "accel150": 4}];
+const CURVE_STEP = 0.01;
+</script>
+<script>
+const CURVE = {
+1: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.3, 1.31, 1.32, 1.33, 1.34, 1.35, 1.36, 1.37, 1.38, 1.39, 1.4, 1.41, 1.42, 1.43, 1.44, 1.45, 1.46, 1.47, 1.48, 1.49, 1.5, 1.51, 1.52, 1.53, 1.54, 1.55, 1.56, 1.57, 1.58, 1.59, 1.7, 1.71, 1.72, 1.73, 1.74, 1.75, 1.76, 1.77, 1.78, 1.79, 1.8, 1.81, 1.82, 1.83, 1.84, 1.85, 1.86, 1.87, 1.88, 1.89, 1.9, 1.91, 1.92, 1.93, 1.94, 1.95, 1.96, 1.97, 1.98, 1.99, 2, 2.01, 2.02, 2.03, 2.04, 2.05, 2.06, 2.07, 2.08, 2.09, 2.1, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.2, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.3, 2.31, 2.32, 2.33, 2.34, 2.35, 2.36, 2.37, 2.38, 2.39, 2.4, 2.41, 2.42, 2.43, 2.44, 2.45, 2.46, 2.47, 2.48, 2.49, 2.5, 2.51, 2.52, 2.53, 2.54, 2.55, 2.56, 2.57, 2.58, 2.59, 2.6, 2.61, 2.62, 2.63, 2.64, 2.65, 2.66, 2.67, 2.68, 2.69, 2.7, 2.71, 2.72],
+2: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.4, 1.41, 1.42, 1.43, 1.44, 1.45, 1.46, 1.47, 1.48, 1.49, 1.5, 1.51, 1.52, 1.53, 1.54, 1.55, 1.56, 1.57, 1.58, 1.59, 1.6, 1.61, 1.62, 1.63, 1.64, 1.65, 1.66, 1.67, 1.68, 1.69, 1.8, 1.81, 1.82, 1.83, 1.84, 1.85, 1.86, 1.87, 1.88, 1.89, 1.9, 1.91, 1.92, 1.93, 1.94, 1.95, 1.96, 1.97, 1.98, 1.99, 2, 2.01, 2.02, 2.03, 2.04, 2.05, 2.06, 2.07, 2.08, 2.09, 2.1, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.2, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.3, 2.31, 2.32, 2.33, 2.34, 2.35, 2.36, 2.37, 2.38, 2.39, 2.4, 2.41, 2.42, 2.43, 2.44, 2.45, 2.46, 2.47, 2.48, 2.49, 2.5, 2.51, 2.52, 2.53, 2.54, 2.55, 2.56, 2.57, 2.58, 2.59, 2.6, 2.61, 2.62, 2.63, 2.64, 2.65, 2.66, 2.67, 2.68, 2.69, 2.7, 2.71, 2.72, 2.73, 2.74, 2.75, 2.76, 2.77, 2.78, 2.79, 2.8, 2.81, 2.82],
+3: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.6, 1.61, 1.62, 1.63, 1.64, 1.65, 1.66, 1.67, 1.68, 1.69, 1.7, 1.71, 1.72, 1.73, 1.74, 1.75, 1.76, 1.77, 1.78, 1.79, 1.8, 1.81, 1.82, 1.83, 1.84, 1.85, 1.86, 1.87, 1.88, 1.89, 2.2, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.3, 2.31, 2.32, 2.33, 2.34, 2.35, 2.36, 2.37, 2.38, 2.39, 2.4, 2.41, 2.42, 2.43, 2.44, 2.45, 2.46, 2.47, 2.48, 2.49, 2.5, 2.51, 2.52, 2.53, 2.54, 2.55, 2.56, 2.57, 2.58, 2.59, 2.6, 2.61, 2.62, 2.63, 2.64, 2.65, 2.66, 2.67, 2.68, 2.69, 2.7, 2.71, 2.72, 2.73, 2.74, 2.75, 2.76, 2.77, 2.78, 2.79, 2.8, 2.81, 2.82, 2.83, 2.84, 2.85, 2.86, 2.87, 2.88, 2.89, 2.9, 2.91, 2.92, 2.93, 2.94, 2.95, 2.96, 2.97, 2.98, 2.99, 3.0, 3.01, 3.02, 3.03, 3.04, 3.05, 3.06, 3.07, 3.08, 3.09, 3.1, 3.11, 3.12, 3.13, 3.14, 3.15, 3.16, 3.17, 3.18, 3.19, 3.2, 3.21, 3.22],
+4: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 1.7, 1.71, 1.72, 1.73, 1.74, 1.75, 1.76, 1.77, 1.78, 1.79, 1.8, 1.81, 1.82, 1.83, 1.84, 1.85, 1.86, 1.87, 1.88, 1.89, 1.9, 1.91, 1.92, 1.93, 1.94, 1.95, 1.96, 1.97, 1.98, 1.99, 2.3, 2.31, 2.32, 2.33, 2.34, 2.35, 2.36, 2.37, 2.38, 2.39, 2.4, 2.41, 2.42, 2.43, 2.44, 2.45, 2.46, 2.47, 2.48, 2.49, 2.5, 2.51, 2.52, 2.53, 2.54, 2.55, 2.56, 2.57, 2.58, 2.59, 2.6, 2.61, 2.62, 2.63, 2.64, 2.65, 2.66, 2.67, 2.68, 2.69, 2.7, 2.71, 2.72, 2.73, 2.74, 2.75, 2.76, 2.77, 2.78, 2.79, 2.8, 2.81, 2.82, 2.83, 2.84, 2.85, 2.86, 2.87, 2.88, 2.89, 2.9, 2.91, 2.92, 2.93, 2.94, 2.95, 2.96, 2.97, 2.98, 2.99, 3.0, 3.01, 3.02, 3.03, 3.04, 3.05, 3.06, 3.07, 3.08, 3.09, 3.1, 3.11, 3.12, 3.13, 3.14, 3.15, 3.16, 3.17, 3.18, 3.19, 3.2, 3.21, 3.22, 3.23, 3.24, 3.25, 3.26, 3.27, 3.28, 3.29, 3.3, 3.31, 3.32],
+5: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.6, 0.61, 0.62, 0.63, 0.64, 0.65, 0.66, 0.67, 0.68, 0.69, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 2, 2.01, 2.02, 2.03, 2.04, 2.05, 2.06, 2.07, 2.08, 2.09, 2.1, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.2, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.7, 2.71, 2.72, 2.73, 2.74, 2.75, 2.76, 2.77, 2.78, 2.79, 2.8, 2.81, 2.82, 2.83, 2.84, 2.85, 2.86, 2.87, 2.88, 2.89, 2.9, 2.91, 2.92, 2.93, 2.94, 2.95, 2.96, 2.97, 2.98, 2.99, 3.0, 3.01, 3.02, 3.03, 3.04, 3.05, 3.06, 3.07, 3.08, 3.09, 3.1, 3.11, 3.12, 3.13, 3.14, 3.15, 3.16, 3.17, 3.18, 3.19, 3.2, 3.21, 3.22, 3.23, 3.24, 3.25, 3.26, 3.27, 3.28, 3.29, 3.3, 3.31, 3.32, 3.33, 3.34, 3.35, 3.36, 3.37, 3.38, 3.39, 3.4, 3.41, 3.42, 3.43, 3.44, 3.45, 3.46, 3.47, 3.48, 3.49, 3.5, 3.51, 3.52, 3.53, 3.54, 3.55, 3.56, 3.57, 3.58, 3.59, 3.6, 3.61, 3.62, 3.63, 3.64, 3.65, 3.66, 3.67, 3.68, 3.69, 3.7, 3.71, 3.72],
+6: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 2.1, 2.11, 2.12, 2.13, 2.14, 2.15, 2.16, 2.17, 2.18, 2.19, 2.2, 2.21, 2.22, 2.23, 2.24, 2.25, 2.26, 2.27, 2.28, 2.29, 2.3, 2.31, 2.32, 2.33, 2.34, 2.35, 2.36, 2.37, 2.38, 2.39, 2.8, 2.81, 2.82, 2.83, 2.84, 2.85, 2.86, 2.87, 2.88, 2.89, 2.9, 2.91, 2.92, 2.93, 2.94, 2.95, 2.96, 2.97, 2.98, 2.99, 3.0, 3.01, 3.02, 3.03, 3.04, 3.05, 3.06, 3.07, 3.08, 3.09, 3.1, 3.11, 3.12, 3.13, 3.14, 3.15, 3.16, 3.17, 3.18, 3.19, 3.2, 3.21, 3.22, 3.23, 3.24, 3.25, 3.26, 3.27, 3.28, 3.29, 3.3, 3.31, 3.32, 3.33, 3.34, 3.35, 3.36, 3.37, 3.38, 3.39, 3.4, 3.41, 3.42, 3.43, 3.44, 3.45, 3.46, 3.47, 3.48, 3.49, 3.5, 3.51, 3.52, 3.53, 3.54, 3.55, 3.56, 3.57, 3.58, 3.59, 3.6, 3.61, 3.62, 3.63, 3.64, 3.65, 3.66, 3.67, 3.68, 3.69, 3.7, 3.71, 3.72, 3.73, 3.74, 3.75, 3.76, 3.77, 3.78, 3.79, 3.8, 3.81, 3.82],
+7: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 2.5, 2.51, 2.52, 2.53, 2.54, 2.55, 2.56, 2.57, 2.58, 2.59, 2.6, 2.61, 2.62, 2.63, 2.64, 2.65, 2.66, 2.67, 2.68, 2.69, 2.7, 2.71, 2.72, 2.73, 2.74, 2.75, 2.76, 2.77, 2.78, 2.79, 3.3, 3.31, 3.32, 3.33, 3.34, 3.35, 3.36, 3.37, 3.38, 3.39, 3.4, 3.41, 3.42, 3.43, 3.44, 3.45, 3.46, 3.47, 3.48, 3.49, 3.5, 3.51, 3.52, 3.53, 3.54, 3.55, 3.56, 3.57, 3.58, 3.59, 3.6, 3.61, 3.62, 3.63, 3.64, 3.65, 3.66, 3.67, 3.68, 3.69, 3.7, 3.71, 3.72, 3.73, 3.74, 3.75, 3.76, 3.77, 3.78, 3.79, 3.8, 3.81, 3.82, 3.83, 3.84, 3.85, 3.86, 3.87, 3.88, 3.89, 3.9, 3.91, 3.92, 3.93, 3.94, 3.95, 3.96, 3.97, 3.98, 3.99, 4.0, 4.01, 4.02, 4.03, 4.04, 4.05, 4.06, 4.07, 4.08, 4.09, 4.1, 4.11, 4.12, 4.13, 4.14, 4.15, 4.16, 4.17, 4.18, 4.19, 4.2, 4.21, 4.22, 4.23, 4.24, 4.25, 4.26, 4.27, 4.28, 4.29, 4.3, 4.31, 4.32],
+8: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 2.6, 2.61, 2.62, 2.63, 2.64, 2.65, 2.66, 2.67, 2.68, 2.69, 2.7, 2.71, 2.72, 2.73, 2.74, 2.75, 2.76, 2.77, 2.78, 2.79, 2.8, 2.81, 2.82, 2.83, 2.84, 2.85, 2.86, 2.87, 2.88, 2.89, 3.4, 3.41, 3.42, 3.43, 3.44, 3.45, 3.46, 3.47, 3.48, 3.49, 3.5, 3.51, 3.52, 3.53, 3.54, 3.55, 3.56, 3.57, 3.58, 3.59, 3.6, 3.61, 3.62, 3.63, 3.64, 3.65, 3.66, 3.67, 3.68, 3.69, 3.7, 3.71, 3.72, 3.73, 3.74, 3.75, 3.76, 3.77, 3.78, 3.79, 3.8, 3.81, 3.82, 3.83, 3.84, 3.85, 3.86, 3.87, 3.88, 3.89, 3.9, 3.91, 3.92, 3.93, 3.94, 3.95, 3.96, 3.97, 3.98, 3.99, 4.0, 4.01, 4.02, 4.03, 4.04, 4.05, 4.06, 4.07, 4.08, 4.09, 4.1, 4.11, 4.12, 4.13, 4.14, 4.15, 4.16, 4.17, 4.18, 4.19, 4.2, 4.21, 4.22, 4.23, 4.24, 4.25, 4.26, 4.27, 4.28, 4.29, 4.3, 4.31, 4.32, 4.33, 4.34, 4.35, 4.36, 4.37, 4.38, 4.39, 4.4, 4.41, 4.42],
+9: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 3, 3.01, 3.02, 3.03, 3.04, 3.05, 3.06, 3.07, 3.08, 3.09, 3.1, 3.11, 3.12, 3.13, 3.14, 3.15, 3.16, 3.17, 3.18, 3.19, 3.2, 3.21, 3.22, 3.23, 3.24, 3.25, 3.26, 3.27, 3.28, 3.29, 3.9, 3.91, 3.92, 3.93, 3.94, 3.95, 3.96, 3.97, 3.98, 3.99, 4.0, 4.01, 4.02, 4.03, 4.04, 4.05, 4.06, 4.07, 4.08, 4.09, 4.1, 4.11, 4.12, 4.13, 4.14, 4.15, 4.16, 4.17, 4.18, 4.19, 4.2, 4.21, 4.22, 4.23, 4.24, 4.25, 4.26, 4.27, 4.28, 4.29, 4.3, 4.31, 4.32, 4.33, 4.34, 4.35, 4.36, 4.37, 4.38, 4.39, 4.4, 4.41, 4.42, 4.43, 4.44, 4.45, 4.46, 4.47, 4.48, 4.49, 4.5, 4.51, 4.52, 4.53, 4.54, 4.55, 4.56, 4.57, 4.58, 4.59, 4.6, 4.61, 4.62, 4.63, 4.64, 4.65, 4.66, 4.67, 4.68, 4.69, 4.7, 4.71, 4.72, 4.73, 4.74, 4.75, 4.76, 4.77, 4.78, 4.79, 4.8, 4.81, 4.82, 4.83, 4.84, 4.85, 4.86, 4.87, 4.88, 4.89, 4.9, 4.91, 4.92],
+10: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.7, 0.71, 0.72, 0.73, 0.74, 0.75, 0.76, 0.77, 0.78, 0.79, 0.8, 0.81, 0.82, 0.83, 0.84, 0.85, 0.86, 0.87, 0.88, 0.89, 0.9, 0.91, 0.92, 0.93, 0.94, 0.95, 0.96, 0.97, 0.98, 0.99, 1, 1.01, 1.02, 1.03, 1.04, 1.05, 1.06, 1.07, 1.08, 1.09, 1.1, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19, 3.1, 3.11, 3.12, 3.13, 3.14, 3.15, 3.16, 3.17, 3.18, 3.19, 3.2, 3.21, 3.22, 3.23, 3.24, 3.25, 3.26, 3.27, 3.28, 3.29, 3.3, 3.31, 3.32, 3.33, 3.34, 3.35, 3.36, 3.37, 3.38, 3.39, 4, 4.01, 4.02, 4.03, 4.04, 4.05, 4.06, 4.07, 4.08, 4.09, 4.1, 4.11, 4.12, 4.13, 4.14, 4.15, 4.16, 4.17, 4.18, 4.19, 4.2, 4.21, 4.22, 4.23, 4.24, 4.25, 4.26, 4.27, 4.28, 4.29, 4.3, 4.31, 4.32, 4.33, 4.34, 4.35, 4.36, 4.37, 4.38, 4.39, 4.4, 4.41, 4.42, 4.43, 4.44, 4.45, 4.46, 4.47, 4.48, 4.49, 4.5, 4.51, 4.52, 4.53, 4.54, 4.55, 4.56, 4.57, 4.58, 4.59, 4.6, 4.61, 4.62, 4.63, 4.64, 4.65, 4.66, 4.67, 4.68, 4.69, 4.7, 4.71, 4.72, 4.73, 4.74, 4.75, 4.76, 4.77, 4.78, 4.79, 4.8, 4.81, 4.82, 4.83, 4.84, 4.85, 4.86, 4.87, 4.88, 4.89, 4.9, 4.91, 4.92, 4.93, 4.94, 4.95, 4.96, 4.97, 4.98, 4.99, 5.0, 5.01, 5.02],
+};
+</script>
+<script>
+function fmtBRL(v){
+  return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+}
+function fmtBRLcents(v){
+  return v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+}
+function getMultiplier(nivel, atingimento){
+  // abaixo de 70%: comissão travada em zero
+  if(atingimento < 0.70) return 0;
+  const arr = CURVE[nivel];
+  const idx = Math.round(atingimento / CURVE_STEP);
+  if(idx < arr.length) return arr[idx];
+  // acima do fim da tabela: continua na mesma inclinação do último trecho
+  const last = arr[arr.length-1];
+  const prev = arr[arr.length-2];
+  const slope = (last - prev) / CURVE_STEP;
+  const extra = atingimento - (arr.length-1)*CURVE_STEP;
+  return last + slope*extra;
+}
+
+const nivelSel = document.getElementById('nivel');
+LEVELS.forEach(l=>{
+  const opt = document.createElement('option');
+  opt.value = l.nivel;
+  opt.textContent = `Nível ${l.nivel}`;
+  nivelSel.appendChild(opt);
+});
+
+const nomeEl = document.getElementById('nome');
+const rampagemEl = document.getElementById('rampagem');
+const faturamentoEl = document.getElementById('faturamento');
+const toastEl = document.getElementById('toast');
+
+// --- identidade via link (?v=nome) ---
+const urlParams = new URLSearchParams(location.search);
+const urlVendor = urlParams.get('v');
+let NOME_TRAVADO = false;
+if(urlVendor){
+  NOME_TRAVADO = true;
+  nomeEl.value = decodeURIComponent(urlVendor).replace(/_/g,' ').replace(/\b\w/g, c=>c.toUpperCase());
+  nomeEl.readOnly = true;
+  nomeEl.classList.add('name-locked');
+}
+
+function pad2(n){ return String(n).padStart(2,'0'); }
+function todayStr(){
+  const d = new Date();
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+}
+function storageKey(nome){
+  return 'vendedor_' + nome.trim().toLowerCase().replace(/\s+/g,'_');
+}
+function histKey(nome){
+  return storageKey(nome) + '_hist';
+}
+
+let saveTimer = null;
+
+function loadFor(nome){
+  if(!nome.trim()) return;
+  try{
+    const raw = localStorage.getItem(storageKey(nome));
+    if(raw){
+      const data = JSON.parse(raw);
+      nivelSel.value = data.nivel || 1;
+      rampagemEl.value = data.rampagem ?? 100;
+      faturamentoEl.value = data.faturamento ?? 0;
+    }
+  }catch(e){
+    // localStorage indisponível (ex: dentro do preview do Claude) — segue com os valores padrão
+  }
+  recalc();
+}
+
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveNow, 500);
+}
+function saveNow(){
+  const nome = nomeEl.value.trim();
+  if(!nome) return;
+  const data = {
+    nivel: parseInt(nivelSel.value),
+    rampagem: parseFloat(rampagemEl.value)||0,
+    faturamento: parseFloat(faturamentoEl.value)||0
+  };
+  try{
+    localStorage.setItem(storageKey(nome), JSON.stringify(data));
+
+    let hist = [];
+    try{ hist = JSON.parse(localStorage.getItem(histKey(nome)) || '[]'); }catch(e){ hist = []; }
+    const ds = todayStr();
+    const idx = hist.findIndex(h=>h.d===ds);
+    if(idx>=0) hist[idx].v = data.faturamento;
+    else hist.push({d: ds, v: data.faturamento});
+    localStorage.setItem(histKey(nome), JSON.stringify(hist));
+
+    toastEl.classList.add('show');
+    setTimeout(()=>toastEl.classList.remove('show'), 1200);
+  }catch(e){
+    // sem localStorage disponível neste ambiente — não salva, mas o cálculo continua funcionando
+  }
+}
+
+function recalc(){
+  const nivelNum = parseInt(nivelSel.value)||1;
+  const lvl = LEVELS[nivelNum-1];
+  const rampagemPct = Math.max(0, Math.min(100, parseFloat(rampagemEl.value)||0));
+  const faturamento = Math.max(0, parseFloat(faturamentoEl.value)||0);
+
+  document.getElementById('oteHint').textContent =
+    `OTE ${fmtBRL(lvl.ote)} · Fixo ${fmtBRL(lvl.fixo)} · Variável ${fmtBRL(lvl.variavel)} · Meta ${fmtBRL(lvl.meta)}`;
+
+  const meta = lvl.meta;
+  const atingimento = meta>0 ? faturamento/meta : 0;
+  const mult = getMultiplier(nivelNum, atingimento);
+  const rampFrac = rampagemPct/100;
+  const comissao = mult * lvl.variavel * rampFrac;
+  const salarioTotal = lvl.fixo + comissao;
+
+  document.getElementById('salarioTotal').textContent = fmtBRLcents(salarioTotal);
+  document.getElementById('fixoVal').textContent = fmtBRLcents(lvl.fixo);
+  document.getElementById('comissaoVal').textContent = fmtBRLcents(comissao);
+  document.getElementById('atingimentoTag').textContent =
+    Math.round(atingimento*100) + '% da meta · multiplicador ' + mult.toFixed(2).replace('.',',') + 'x';
+
+  // marker position on a 0-1.6 (160%) visual scale, clamped
+  const scaleMax = 1.6;
+  const pct = Math.max(0, Math.min(1, atingimento/scaleMax)) * 100;
+  document.getElementById('marker').style.left = pct + '%';
+
+  const metaMinima = meta*0.70;
+  const metaIdeal = meta*1.00;
+  const meta120 = meta*1.20;
+  const meta150 = meta*1.50;
+
+  const nextCard = document.getElementById('nextCard');
+  const nextTag = document.getElementById('nextTag');
+  const nextMsg = document.getElementById('nextMsg');
+  const nextSub = document.getElementById('nextSub');
+  nextCard.className = 'next-banner';
+
+  if(faturamento < metaMinima){
+    nextCard.classList.add('state-floor');
+    nextTag.textContent = 'AINDA NÃO LIBEROU COMISSÃO';
+    nextMsg.innerHTML = `Faltam <b>${fmtBRL(metaMinima-faturamento)}</b> para destravar a comissão (meta mínima)`;
+    nextSub.textContent = `Meta mínima do Nível ${nivelNum}: ${fmtBRL(metaMinima)}`;
+  } else if(faturamento < metaIdeal){
+    nextCard.classList.add('state-warn');
+    nextTag.textContent = 'RUMO À META';
+    nextMsg.innerHTML = `Faltam <b>${fmtBRL(metaIdeal-faturamento)}</b> para bater a meta ideal (100%)`;
+    nextSub.textContent = `Meta do Nível ${nivelNum}: ${fmtBRL(metaIdeal)}`;
+  } else if(faturamento < meta120){
+    nextCard.classList.add('state-ok');
+    nextTag.textContent = 'META BATIDA — RUMO AO ACELERADOR';
+    nextMsg.innerHTML = `Faltam <b>${fmtBRL(meta120-faturamento)}</b> para o multiplicador saltar para <b>${lvl.accel120.toFixed(1).replace('.',',')}x</b>`;
+    nextSub.textContent = `Acelerador de 120% em: ${fmtBRL(meta120)}`;
+  } else if(faturamento < meta150){
+    nextCard.classList.add('state-accel');
+    nextTag.textContent = 'NO ACELERADOR 120%';
+    nextMsg.innerHTML = `Faltam <b>${fmtBRL(meta150-faturamento)}</b> para o multiplicador saltar para <b>${lvl.accel150.toFixed(1).replace('.',',')}x</b>`;
+    nextSub.textContent = `Acelerador de 150% em: ${fmtBRL(meta150)}`;
+  } else {
+    nextCard.classList.add('state-accel');
+    nextTag.textContent = 'NO MAIOR ACELERADOR';
+    nextMsg.innerHTML = `Você passou de 150% da meta — multiplicador atual de <b>${mult.toFixed(2).replace('.',',')}x</b>, e continua subindo a cada venda`;
+    nextSub.textContent = `Faturamento ${fmtBRL(faturamento - meta150)} acima do acelerador de 150%`;
+  }
+
+  scheduleSave();
+}
+
+function renderChart(){
+  const nome = nomeEl.value.trim();
+  const nivelNum = parseInt(nivelSel.value)||1;
+  const lvl = LEVELS[nivelNum-1];
+  document.getElementById('chartTitle').textContent = `Ritmo do mês — Nível ${nivelNum}`;
+
+  const container = document.getElementById('chartContainer');
+  const emptyMsg = document.getElementById('chartEmptyMsg');
+
+  if(!nome){
+    container.innerHTML = '<div class="hint">Preencha seu nome na tela anterior primeiro.</div>';
+    emptyMsg.style.display = 'none';
+    return;
+  }
+
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const lastDay = new Date(year, month+1, 0).getDate();
+  const todayDay = now.getDate();
+  const monthPrefix = `${year}-${pad2(month+1)}-`;
+
+  let hist = [];
+  try{ hist = JSON.parse(localStorage.getItem(histKey(nome)) || '[]'); }catch(e){ hist = []; }
+
+  let points = hist.filter(h=>h.d.startsWith(monthPrefix))
+                    .map(h=>({day: parseInt(h.d.split('-')[2]), v: h.v}));
+
+  const liveVal = Math.max(0, parseFloat(faturamentoEl.value)||0);
+  const idxToday = points.findIndex(p=>p.day===todayDay);
+  if(idxToday>=0) points[idxToday].v = liveVal;
+  else points.push({day: todayDay, v: liveVal});
+  points.sort((a,b)=>a.day-b.day);
+
+  const meta = lvl.meta;
+  const maxV = Math.max(meta*1.1, ...points.map(p=>p.v), 1) * 1.05;
+
+  const W=300, H=190, padL=38, padR=8, padT=10, padB=20;
+  const plotW = W-padL-padR, plotH = H-padT-padB;
+  const xFor = day => padL + (lastDay>1 ? (day-1)/(lastDay-1) : 0)*plotW;
+  const yFor = v => padT + plotH - Math.max(0, Math.min(1, v/maxV))*plotH;
+
+  const refX1=xFor(1), refY1=yFor(0), refX2=xFor(lastDay), refY2=yFor(meta);
+  const actualPath = points.map((p,i)=>(i===0?'M':'L')+xFor(p.day).toFixed(1)+','+yFor(p.v).toFixed(1)).join(' ');
+  const dots = points.map(p=>`<circle cx="${xFor(p.day).toFixed(1)}" cy="${yFor(p.v).toFixed(1)}" r="3" fill="#1A1F5E"/>`).join('');
+
+  container.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block;">
+      <line x1="${padL}" y1="${padT}" x2="${padL}" y2="${padT+plotH}" stroke="#E7E8F0" stroke-width="1"/>
+      <line x1="${padL}" y1="${padT+plotH}" x2="${padL+plotW}" y2="${padT+plotH}" stroke="#E7E8F0" stroke-width="1"/>
+      <line x1="${refX1}" y1="${refY1}" x2="${refX2}" y2="${refY2}" stroke="#9CA3AF" stroke-width="1.5" stroke-dasharray="4,3"/>
+      <path d="${actualPath}" fill="none" stroke="#1A1F5E" stroke-width="2.5"/>
+      ${dots}
+      <text x="${padL}" y="${H-5}" font-size="9" fill="#6B7280">dia 1</text>
+      <text x="${padL+plotW}" y="${H-5}" font-size="9" fill="#6B7280" text-anchor="end">dia ${lastDay}</text>
+      <text x="${padL-5}" y="${padT+5}" font-size="9" fill="#6B7280" text-anchor="end">${fmtBRL(maxV)}</text>
+      <text x="${padL-5}" y="${padT+plotH}" font-size="9" fill="#6B7280" text-anchor="end">R$0</text>
+    </svg>`;
+
+  emptyMsg.style.display = points.length < 2 ? 'block' : 'none';
+}
+
+document.getElementById('infoToggle').addEventListener('click', ()=>{
+  const fn = document.getElementById('footnote');
+  fn.classList.toggle('show');
+});
+
+document.getElementById('chartBtn').addEventListener('click', ()=>{
+  document.getElementById('mainScreen').style.display = 'none';
+  document.getElementById('chartScreen').style.display = 'block';
+  renderChart();
+});
+document.getElementById('backBtn').addEventListener('click', ()=>{
+  document.getElementById('chartScreen').style.display = 'none';
+  document.getElementById('mainScreen').style.display = 'block';
+});
+
+if(!NOME_TRAVADO){
+  nomeEl.addEventListener('blur', ()=>loadFor(nomeEl.value));
+  nomeEl.addEventListener('change', ()=>loadFor(nomeEl.value));
+}
+[nivelSel, rampagemEl, faturamentoEl].forEach(el=>{
+  el.addEventListener('input', recalc);
+  el.addEventListener('change', recalc);
+});
+
+if(NOME_TRAVADO){
+  loadFor(nomeEl.value);
+} else {
+  recalc();
+}
+</script>
+</body>
+</html>
